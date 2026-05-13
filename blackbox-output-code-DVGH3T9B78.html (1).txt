@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>Nossa Surpresa</title>
+<style>
+  /* Reset básico */
+  * {
+    margin: 0; padding: 0; box-sizing: border-box; 
+  }
+  html, body {
+    height: 100%; width: 100%;
+    font-family: 'Playfair Display', serif; /* Elegante serifada */
+    background: #121212; /* Preto fosco */
+    color: #f5f0eb; /* Branco suave */
+    overflow-x: hidden;
+  }
+
+  /* Importando fontes */
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;500&display=swap');
+
+  body {
+    font-family: 'Montserrat', sans-serif;
+  }
+
+  /* --- Paleta Dourada e Champagne --- */
+  :root {
+    --gold: #bfa059;
+    --gold-light: #dacb96;
+    --champagne: #f7ead9;
+    --glass-bg: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.25);
+  }
+
+  /* Video/música background na TELA1 */
+  #particlesCanvas {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 1;
+    pointer-events: none;
+  }
+
+  /* Container principal */
+  .screen {
+    position: relative;
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 0 20px;
+    text-align: center;
+    background: #121212;
+    z-index: 10;
+    user-select: none;
+  }
+
+  /* Glassmorphism leve para os conteúdos */
+  .glass-panel {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 15px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 0 15px var(--gold-light);
+    padding: 30px 40px;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  /* Textos da TELA1 */
+  #screen1 .line {
+    font-family: 'Playfair Display', serif;
+    font-weight: 400;
+    font-size: 2rem;
+    color: var(--champagne);
+    opacity: 0;
+    margin-bottom: 1.5em;
+    animation-fill-mode: forwards;
+    animation-timing-function: ease-in-out;
+  }
+
+  #screen1 .line:nth-child(1) {
+    animation: fadeInText 3s ease forwards;
+  }
+  #screen1 .line:nth-child(2) {
+    animation: fadeInText 3s ease forwards;
+    animation-delay: 4s;
+  }
+
+  /* Botão premium dourado */
+  #btnOpen {
+    margin-top: 3em;
+    background: linear-gradient(45deg, #c1aa4e, #8a772f);
+    border: none;
+    padding: 14px 42px;
+    border-radius: 50px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 600;
+    font-size: 1.1rem;
+    letter-spacing: 1.2px;
+    color: var(--champagne);
+    cursor: pointer;
+    box-shadow: 0 0 15px var(--gold);
+    transition: box-shadow 0.4s ease, transform 0.3s ease;
+  }
+  #btnOpen:hover, #btnOpen:focus {
+    outline: none;
+    box-shadow: 0 0 30px var(--gold-light);
+    transform: translateY(-4px);
+  }
+
+  /* Animação fadeInText */
+  @keyframes fadeInText {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  /* TELA 2 - História do casal */
+  #screen2 {
+    display: none;
+  }
+  #screen2.active {
+    display: flex;
+  }
+  #screen2 .parallax-gallery {
+    display: flex;
+    gap: 2rem;
+    overflow-x: auto;
+    padding-bottom: 2rem;
+    scroll-behavior: smooth;
+  }
+  #screen2 .parallax-gallery::-webkit-scrollbar {
+    display: none;
+  }
+  #screen2 .photo-frame {
+    flex: 0 0 220px;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 0 15px var(--gold);
+    border: 2px solid var(--gold-light);
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+  }
+  #screen2 .photo-frame:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 30px var(--gold-light);
+  }
+  #screen2 .photo-frame img {
+    width: 100%;
+    height: auto;
+    display: block;
+    filter: brightness(0.9);
+    transition: filter 0.3s ease;
+  }
+  #screen2 .photo-frame:hover img {
+    filter: brightness(1);
+  }
+
+  /* Frases emocionais */
+  #screen2 .emotional-text {
+    font-family: 'Playfair Display', serif;
+    font-weight: 500;
+    font-size: 1.6rem;
+    color: var(--gold);
+    margin: 1.6rem 0;
+    text-align: center;
+    letter-spacing: 1.1px;
+    text-shadow: 0 0 12px rgba(191,160,89,0.9);
+  }
+
+  /* Efeito parallax leve (JS controla) */
+  .parallax-photo {
+    will-change: transform;
+    transition: transform 0.3s ease;
+  }
+  /* brilho dourado suave nas transições */
+  #screen2 .parallax-gallery.fade {
+    animation: goldenGlow 3s ease-in-out infinite;
+  }
+  @keyframes goldenGlow {
+    0%, 100% { box-shadow: 0 0 25px var(--gold); }
+    50% { box-shadow: 0 0 40px var(--gold-light); }
+  }
+
+  /* TELA 3 - Revelação principal */
+  #screen3 {
+    display: none;
+    background: #090909;
+    color: var(--champagne);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px 20px;
+  }
+  #screen3.active {
+    display: flex;
+  }
+  /* Batimento cardíaco */
+  #heartbeat {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 2rem;
+  }
+  /* Luz dourada surgindo */
+  #goldLight {
+    position: absolute;
+    left: 50%; top: 50%;
+    width: 300px; height: 300px;
+    margin-left: -150px;
+    margin-top: -150px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--gold) 25%, transparent 70%);
+    opacity: 0;
+    animation: fadeInGlow 5s forwards;
+    z-index: 5;
+  }
+  @keyframes fadeInGlow {
+    from { opacity: 0; }
+    to { opacity: 0.7; }
+  }
+
+  #mainReveal {
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    text-shadow: 0 0 25px var(--gold-light);
+    animation: fadeInReveal 3s ease forwards;
+    opacity: 0;
+  }
+  #subReveal {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.5rem;
+    letter-spacing: 1.2px;
+    color: #fbbfbb;
+    animation: fadeInReveal 4s ease forwards;
+    opacity: 0;
+  }
+  @keyframes fadeInReveal {
+    to { opacity: 1; }
+  }
+  /* Chuva de partículas douradas e corações */
+  #particlesReveal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 10;
+  }
+
+  /* Extras */
+  #extrasContainer {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    padding: 30px;
+    max-width: 850px;
+    margin: 3rem auto 5rem auto;
+    color: var(--champagne);
+  }
+  #extrasContainer h2 {
+    font-family: 'Playfair Display', serif;
+    font-weight: 600;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+    text-align: center;
+    color: var(--gold);
+    text-shadow: 0 0 15px var(--gold-light);
+  }
+  #weekCounter {
+    font-size: 1.2rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+  }
+  #ultrasoundPhoto {
+    width: 220px;
+    max-width: 100%;
+    display: block;
+    margin: 0 auto 1.5rem auto;
+    border-radius: 12px;
+    border: 2px solid var(--gold-light);
+    box-shadow: 0 0 15px var(--gold);
+  }
+  #videoCouple {
+    width: 100%;
+    max-width: 700px;
+    margin: 1rem auto 2rem auto;
+    border-radius: 15px;
+    box-shadow: 0 0 20px var(--gold-light);
+  }
+
+  /* Linha do tempo */
+  .timeline {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    margin: 2rem 0;
+    padding: 0 10px;
+  }
+  .timeline::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 5%;
+    right: 5%;
+    height: 3px;
+    background: var(--gold-light);
+    border-radius: 10px;
+    transform: translateY(-50%);
+    z-index: 0;
+  }
+  .timeline-item {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    padding: 1rem 1.3rem;
+    border-radius: 10px;
+    position: relative;
+    z-index: 1;
+    max-width: 150px;
+    font-size: 0.9rem;
+    font-family: 'Montserrat', sans-serif;
+    color: var(--champagne);
+    text-align: center;
+    box-shadow: 0 0 10px var(--gold-light);
+  }
+  .timeline-item::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 18px;
+    height: 18px;
+    background: var(--gold);
+    border-radius: 50%;
+    border: 3px solid var(--champagne);
+    left: 50%;
+    margin-left: -9px;
+    z-index: -1;
+  }
+
+  /* Sessão mensagens da família */
+  #familyMessages {
+    margin-top: 2rem;
+    max-width: 700px;
+  }
+  #familyMessages h3 {
+    font-family: 'Playfair Display', serif;
+    color: var(--gold);
+    margin-bottom: 1rem;
+    text-align: center;
+  }
+  #messagesList {
+    list-style: none;
+    max-height: 150px;
+    overflow-y: auto;
+    padding: 0 1rem;
+  }
+  #messagesList li {
+    background: var(--glass-bg);
+    margin-bottom: 0.7rem;
+    padding: 0.6rem 1rem;
+    border-radius: 12px;
+    box-shadow: 0 0 10px var(--gold-light);
+    font-family: 'Montserrat', sans-serif;
+    font-size: 0.95rem;
+    color: var(--champagne);
+  }
+
+  /* Input e button para mensagem */
+  #familyInput {
+    display: flex;
+    margin-top: 1rem;
+    gap: 10px;
+    justify-content: center;
+  }
+  #familyInput input[type="text"] {
+    padding: 0.7rem 1rem;
+    border-radius: 50px;
+    border: 1.5px solid var(--gold-light);
+    background: transparent;
+    color: var(--champagne);
+    font-size: 1rem;
+    flex-grow: 1;
+    font-family: 'Montserrat', sans-serif;
+  }
+  #familyInput input[type="text"]::placeholder {
+    color: var(--gold-light);
+  }
+  #familyInput button {
+    padding: 0.7rem 20px;
+    background: var(--gold);
+    border: none;
+    border-radius: 50px;
+    color: var(--champagne);
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 0 15px var(--gold-light);
+    transition: box-shadow 0.3s ease;
+  }
+  #familyInput button:hover {
+    box-shadow: 0 0 30px var(--gold-light);
+  }
+
+  /* Botões compartilhamento */
+  #shareButtons {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: center;
+    gap: 25px;
+  }
+  .share-btn {
+    background: var(--gold);
+    border-radius: 50%;
+    padding: 14px;
+    cursor: pointer;
+    box-shadow: 0 0 15px var(--gold-light);
+    transition: box-shadow 0.3s ease;
+  }
+  .share-btn svg {
+    width: 24px;
+    height: 24px;
+    fill: var(--champagne);
+  }
+  .share-btn:hover {
+    box-shadow: 0 0 30px var(--gold-light);
+  }
+
+  /* Responsividade */
+  @media (max-width: 768px) {
+    #screen1 .line {
+      font-size: 1.5rem;
+    }
+    #screen3 #mainReveal {
+      font-size: 2rem;
+    }
+    #screen2 .parallax-gallery {
+      gap: 1rem;
+    }
+    #screen2 .photo-frame {
+      flex: 0 0 140px;
+    }
+    .timeline {
+      flex-direction: column;
+      align-items: center;
+    }
+    .timeline::before {
+      top: auto;
+      left: 50%;
+      height: auto;
+      width: 3px;
+      background: var(--gold-light);
+      height: 90%;
+      transform: translateX(-50%);
+    }
+    .timeline-item {
+      max-width: none;
+      margin-bottom: 2rem;
+    }
+    .timeline-item::after {
+      top: 50%;
+      left: 50%;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- TELA 1 - ABERTURA CINEMATOGRÁFICA -->
+<section id="screen1" class="screen" aria-label="Abertura cinematográfica">
+  <canvas id="particlesCanvas"></canvas>
+  <div class="glass-panel" aria-live="polite" aria-atomic="true">
+    <p class="line">Algumas notícias mudam nossas vidas para sempre…</p>
+    <p class="line">E essa será a mais especial de todas.</p>
+    <button id="btnOpen" aria-label="Abrir nossa surpresa">Abrir nossa surpresa</button>
+  </div>
+  <audio id="bgMusic" src="https://assets.codepen.io/3/piano-melody-2.mp3" loop preload="auto"></audio>
+</section>
+
+<!-- TELA 2 - HISTÓRIA DO CASAL -->
+<section id="screen2" class="screen" aria-label="História do casal" tabindex="-1">
+  <div class="glass-panel fade">
+    <div class="emotional-text">Tudo começou com nós dois…</div>
+    <div class="parallax-gallery" id="photoGallery">
+      <!-- Fotos do casal vão aqui dinamicamente -->
+    </div>
+    <div class="emotional-text">Construímos sonhos…</div>
+    <div class="emotional-text">Vivemos momentos inesquecíveis…</div>
+    <div class="emotional-text">E agora nossa família está crescendo.</div>
+    <button id="btnReveal" aria-label="Ir para a revelação principal" style="margin-top:30px; background: var(--gold); padding:12px 30px; border:none; border-radius:40px; font-weight: 600; font-family: 'Montserrat', sans-serif; box-shadow: 0 0 25px var(--gold); cursor:pointer;">Ver revelação</button>
+  </div>
+</section>
+
+<!-- TELA 3 - REVELAÇÃO PRINCIPAL -->
+<section id="screen3" class="screen" aria-label="Revelação principal" tabindex="-1" style="position:relative; overflow:hidden;">
+  <div id="goldLight"></div>
+  <div id="heartbeat" aria-hidden="true">
+    <svg viewBox="0 0 100 100" fill="none" stroke="var(--gold)" stroke-width="6" stroke-linejoin="round" stroke-linecap="round" >
+      <path id="heartPath" d="M10,50 Q25,20 50,50 T90,50 Q75,80 50,50 T10,50 Z" fill="var(--gold)" />
+    </svg>
+  </div>
+  <h1 id="mainReveal" tabindex="0">Nós vamos ser papais.</h1>
+  <p id="subReveal">Nosso maior amor está a caminho ❤️</p>
+  <canvas id="particlesReveal"></canvas>
+</section>
+
+<!-- ELEMENTOS EXTRAS -->
+<section id="extrasContainer" aria-label="Extras do anúncio">
+  <h2>Novidades da nossa jornada</h2>
+  <div id="weekCounter" aria-live="polite">Gravidez: 12 semanas</div>
+  <img id="ultrasoundPhoto" alt="Foto do ultrassom" src="https://via.placeholder.com/220x160?text=Ultrassom" />
+  <video id="videoCouple" controls preload="metadata" aria-label="Vídeo do casal">
+    <source src="" type="video/mp4" />
+    Seu navegador não suporta vídeo.
+  </video>
+
+  <div class="timeline" aria-label="Linha do tempo da história do casal">
+    <div class="timeline-item">Primeiro encontro - 2018</div>
+    <div class="timeline-item">Mudança juntos - 2019</div>
+    <div class="timeline-item">Casamento - 2021</div>
+    <div class="timeline-item">Descoberta da gravidez - 2024</div>
+  </div>
+
+  <div id="familyMessages" aria-live="polite">
+    <h3>Mensagens da família</h3>
+    <ul id="messagesList" role="list"></ul>
+    <form id="messageForm" aria-label="Adicionar mensagem da família">
+      <div id="familyInput">
+        <input type="text" id="msgInput" placeholder="Deixe sua mensagem..." aria-label="Mensagem da família" required />
+        <button type="submit" aria-label="Enviar mensagem">Enviar</button>
+      </div>
+    </form>
+  </div>
+
+  <div id="shareButtons" role="group" aria-label="Compartilhar nas redes sociais">
+    <button class="share-btn" id="shareWhats" aria-label="Compartilhar no WhatsApp" title="WhatsApp">
+      <svg viewBox="0 0 24 24"><path d="M16.67 14.09c-.28 0-1.63-.8-1.88-.9-.25-.1-.43-.15-.62.15-.19.3-.77.9-.94 1.08-.17.18-.34.2-.62.07-.28-.12-1.17-.43-2.23-1.38-.82-.73-1.38-1.64-1.54-1.92-.16-.28-.02-.43.13-.56.13-.13.28-.34.42-.51.14-.17.18-.28.28-.46.1-.17.05-.31-.02-.43-.07-.12-.62-1.5-.85-2.06-.22-.54-.44-.47-.62-.48-.16-.01-.35.01-.54.01s-.43.07-.65.31c-.22.24-.84.82-.84 2 .01 1.17.86 2.3.98 2.46.12.16 1.69 2.63 4.11 3.69.57.25 1.02.4 1.37.51.58.18 1.11.15 1.53.09.47-.07 1.63-.67 1.86-1.31.23-.63.23-1.18.16-1.31-.07-.13-.28-.2-.56-.28-.28-.07-1.68-.79-1.95-.88z"/></svg>
+    </button>
+    <button class="share-btn" id="shareInsta" aria-label="Compartilhar no Instagram" title="Instagram">
+      <svg viewBox="0 0 24 24"><path d="M7 2C4.243 2 2 4.243 2 7v10c0 2.757 2.243 5 5 5h10c2.757 0 5-2.243 5-5V7c0-2.757-2.243-5-5-5H7zm8 2c.552 0 1 .447 1 1v2c0 .553-.448 1-1 1H9C8.448 8 8 7.553 8 7V5c0-.553.448-1 1-1h6zm-4 10c2.669 0 4-1.341 4-4 0-2.75-1.331-4-4-4s-4 1.25-4 4c0 2.659 1.331 4 4 4zm0-6c1.137 0 2 .864 2 2 0 1.141-.863 2-2 2s-2-.859-2-2c0-1.136.863-2 2-2z"/></svg>
+    </button>
+  </div>
+</section>
+
+<script>
+  // Variables
+  const btnOpen = document.getElementById('btnOpen');
+  const screen1 = document.getElementById('screen1');
+  const screen2 = document.getElementById('screen2');
+  const screen3 = document.getElementById('screen3');
+  const photoGallery = document.getElementById('photoGallery');
+  const btnReveal = document.getElementById('btnReveal');
+  const particlesCanvas = document.getElementById('particlesCanvas');
+  const particlesRevealCanvas = document.getElementById('particlesReveal');
+  const bgMusic = document.getElementById('bgMusic');
+  const msgForm = document.getElementById('messageForm');
+  const msgInput = document.getElementById('msgInput');
+  const messagesList = document.getElementById('messagesList');
+  const weekCounter = document.getElementById('weekCounter');
+  const ultrasoundPhoto = document.getElementById('ultrasoundPhoto');
+  const videoCouple = document.getElementById('videoCouple');
+
+  // Fotos do casal (envio da imagem recebida pelo usuário)
+  // Como exemplo usaremos a foto enviada, mas "fonte" será local
+  const photos = [
+    'photo1.jpg', // substitua com URLs/assets reais
+    'photo2.jpg',
+    'photo3.jpg',
+  ];
+
+  // INSERÇÃO da imagem do casal enviada (tratamento elegante)
+  const userPhotoUrl = URL.createObjectURL(new Blob([], {type:"image/jpeg"})); // placeholder
+  // Como não temos acesso ao arquivo real, usarei a imagem do input manualmente:
+
+  // Inserir a foto enviada (exemplo com a que o usuário enviou)
+  const userImageURL = 'data:image/jpeg;base64,iVBORw0KGgoAAAANSUhEUgAAAoAAAAHgCAYAAADmF/aHAAA'; 
+  // no seu caso, eu vi a imagem - entao aqui basta usar a url da foto se hospedar ou usar URL do arquivo recebido.
+  // Como não consigo hostear foto da conversa, deixo um espaço para você inserir após hospedar.
+
+  // Exemplo: adicionar foto enviada (destaque no início da galeria)
+  // Como nesse ambiente não tenho como usar a foto real, darei exemplo com um placeholder elegante.
+
+  // Função para criar elemento foto
+  function createPhotoFrame(src, alt = "Foto do casal") {
+    const frame = document.createElement('div');
+    frame.classList.add('photo-frame', 'parallax-photo');
+    const img = document.createElement('img');
+    img.src = src;
+    img.alt = alt;
+    frame.appendChild(img);
+    return frame;
+  }
+
+  // Popular galeria
+  function populateGallery() {
+    // Inserir foto enviada primeiro se disponível
+    if(userImageURL) {
+      // Usar userImageURL se hospedado corretamente
+      photoGallery.appendChild(createPhotoFrame(userImageURL, 'Foto especial do casal'));
+    }
+
+    // Inserir fotos estáticas (substitua pelas reais URLs)
+    photos.forEach((src, i) => {
+      // Substituir por imagens reais (URLs corretas)
+      photoGallery.appendChild(createPhotoFrame(src, `Foto do casal ${i+1}`));
+    });
+  }
+
+  populateGallery();
+
+  // Parallax leve nas fotos ao mover mouse
+  document.getElementById('screen2').addEventListener('mousemove', e => {
+    const gallery = photoGallery;
+    const rect = gallery.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const deltaX = (e.clientX - centerX) / rect.width;
+    const deltaY = (e.clientY - centerY) / rect.height;
+
+    const photos = gallery.querySelectorAll('.parallax-photo');
+    photos.forEach((p, i) => {
+      const speed = 10 + i * 2;
+      const moveX = deltaX * speed;
+      const moveY = deltaY * speed;
+      p.style.transform = `translate3d(${moveX}px, ${moveY}px, 0)`;
+    });
+  });
+
+  document.getElementById('screen2').addEventListener('mouseleave', e => {
+    photoGallery.querySelectorAll('.parallax-photo').forEach(p => {
+      p.style.transform = 'translate3d(0,0,0)';
+    });
+  });
+
+  // Função para controlar as telas e transições
+  btnOpen.addEventListener('click', () => {
+    // Tocar música
+    bgMusic.volume = 0.15;
+    bgMusic.play();
+    // Ir para tela 2
+    screen1.style.display = 'none';
+    screen2.classList.add('active');
+    screen2.focus();
+  });
+
+  btnReveal.addEventListener('click', () => {
+    // Parar música screen2 e iniciar som batimento no reveal
+    bgMusic.pause();
+    startHeartbeat();
+    startRevealParticles();
+    screen2.classList.remove('active');
+    screen3.classList.add('active');
+    screen3.focus();
+  });
+
+  // Contador semanas exemplo
+  let pregnancyWeeks = 12;
+  weekCounter.textContent = `Gravidez: ${pregnancyWeeks} semanas`;
+
+  // Form mensagem da família
+  msgForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const text = msgInput.value.trim();
+    if(text.length > 0) {
+      const li = document.createElement('li');
+      li.textContent = text;
+      messagesList.appendChild(li);
+      msgInput.value = '';
+      messagesList.scrollTop = messagesList.scrollHeight;
+    }
+  });
+
+  // Compartilhamento - Botões básicos
+  document.getElementById('shareWhats').addEventListener('click', () => {
+    const url = window.location.href;
+    const text = encodeURIComponent('Temos uma surpresa incrível para compartilhar: estamos esperando nosso bebê! ❤️');
+    window.open(`https://wa.me/?text=${text}%20${encodeURIComponent(url)}`, '_blank');
+  });
+  document.getElementById('shareInsta').addEventListener('click', () => {
+    alert('Compartilhar no Instagram via link não é suportado diretamente. Copie o link do site para compartilhar no Instagram Stories ou Feed.');
+  });
+
+  /* Animação partículas douradas TELA1 */
+  const ctx = particlesCanvas.getContext('2d');
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  particlesCanvas.width = w;
+  particlesCanvas.height = h;
+
+  class Particle {
+    constructor(){
+      this.x = Math.random() * w;
+      this.y = Math.random() * h;
+      this.radius = Math.random() * 1.5 + 0.5;
+      this.speedY = Math.random()*0.2 + 0.05;
+      this.opacity = Math.random();
+      this.color = `rgba(191, 160, 89, ${this.opacity})`;
+    }
+    update(){
+      this.y -= this.speedY;
+      if(this.y < 0) {
+        this.y = h;
+        this.x = Math.random() * w;
+      }
+      this.opacity += (Math.random() - 0.5)*0.05;
+      this.opacity = Math.min(Math.max(this.opacity, 0.1), 0.9);
+      this.color = `rgba(191, 160, 89, ${this.opacity})`;
+    }
+    draw(){
+      ctx.beginPath();
+      ctx.fillStyle = this.color;
+      ctx.shadowColor = 'rgba(191,160,89,0.8)';
+      ctx.shadowBlur = 6;
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2);
+      ctx.fill();
+    }
+  }
+
+  const particles = [];
+  for(let i=0; i<50; i++) particles.push(new Particle());
+  function animateParticles() {
+    ctx.clearRect(0,0,w,h);
+    particles.forEach(p => {
+      p.update();
+      p.draw();
+    });
+    requestAnimationFrame(animateParticles);
+  }
+  animateParticles();
+
+  /* Batimento cardíaco TELA3 */
+  const heart = document.getElementById('heartPath');
+  let scaleDir = 1;
+  let scaleVal = 1;
+  function heartbeatAnim() {
+    scaleVal += scaleDir * 0.02;
+    if(scaleVal > 1.15) scaleDir = -1;
+    if(scaleVal < 1) scaleDir = 1;
+    heart.style.transform = `scale(${scaleVal})`;
+    requestAnimationFrame(heartbeatAnim);
+  }
+  function startHeartbeat() {
+    heartbeatAnim();
+  }
+
+  /* Partículas na revelação principal */
+  const ctxReveal = particlesRevealCanvas.getContext('2d');
+  particlesRevealCanvas.width = window.innerWidth;
+  particlesRevealCanvas.height = window.innerHeight;
+
+  class RevealParticle {
+    constructor() {
+      this.x = Math.random() * window.innerWidth;
+      this.y = Math.random() * window.innerHeight;
+      this.size = Math.random() * 10 + 5;
+      this.speedY = 0.5 + Math.random();
+      this.color = Math.random() > 0.7 ? 'rgba(251,191,187,0.9)' : 'rgba(191,160,89, 0.8)';
+      this.type = Math.random() > 0.52 ? 'heart' : 'circle';
+      this.angle = 0;
+      this.angleSpeed = 0.05 + Math.random()*0.02;
+    }
+    update() {
+      this.y += this.speedY;
+      this.angle += this.angleSpeed;
+      if(this.y > window.innerHeight + this.size) {
+        this.y = -20;
+        this.x = Math.random() * window.innerWidth;
+      }
+    }
+    draw() {
+      ctxReveal.save();
+      ctxReveal.translate(this.x, this.y);
+      if(this.type === 'heart') {
+        ctxReveal.rotate(Math.sin(this.angle));
+        ctxReveal.fillStyle = 'rgba(251,191,187,0.85)';
+        ctxReveal.beginPath();
+        const size = this.size / 5;
+        ctxReveal.moveTo(0, -size);
+        ctxReveal.bezierCurveTo(size, -2*size, 3*size, size/2, 0, 3*size);
+        ctxReveal.bezierCurveTo(-3*size, size/2, -size, -2*size, 0, -size);
+        ctxReveal.fill();
+      } else {
+        ctxReveal.fillStyle = this.color;
+        ctxReveal.shadowColor = this.color;
+        ctxReveal.shadowBlur = 10;
+        ctxReveal.beginPath();
+        ctxReveal.arc(0, 0, this.size / 3, 0, Math.PI * 2);
+        ctxReveal.fill();
+      }
+      ctxReveal.restore();
+    }
+  }
+
+  const revealParticles = [];
+  for(let i=0; i<50; i++) revealParticles.push(new RevealParticle());
+
+  function startRevealParticles() {
+    function animateReveal() {
+      ctxReveal.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      revealParticles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+      requestAnimationFrame(animateReveal);
+    }
+    animateReveal();
+  }
+
+  // Ajustar canvas ao redimensionar
+  window.addEventListener('resize', () => {
+    particlesCanvas.width = window.innerWidth;
+    particlesCanvas.height = window.innerHeight;
+    particlesRevealCanvas.width = window.innerWidth;
+    particlesRevealCanvas.height = window.innerHeight;
+  });
+
+</script>
+
+</body>
+</html>
